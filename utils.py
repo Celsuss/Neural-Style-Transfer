@@ -2,6 +2,7 @@ import IPython.display as display
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import tensorflow as tf
+import os
 
 mpl.rcParams['figure.figsize'] = (12,12)
 mpl.rcParams['axes.grid'] = False
@@ -21,6 +22,18 @@ def load_img(path):
     img = tf.image.resize(img, new_shape)
     img = img[tf.newaxis, :]
     return img
+
+def save_img(image, path, name):
+    if not os.path.isdir(path):
+        try:
+            os.mkdir(path)
+        except OSError as exc:
+            print('Can\'t create path: {}'.format(os.path.join(os.getcwd(), path)))
+            return
+            
+    full_path = os.path.join(path, name+'.png')
+    print('Saving image {}'.format(full_path))
+    mpl.image.imsave(full_path, image[0])
 
 def imshow(image, title=None, draw=True):
     if len(image.shape) > 3:
