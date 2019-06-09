@@ -1,4 +1,7 @@
 #%%
+import os
+import sys
+import time
 import utils
 import tensorflow as tf
 from tensorflow.python.keras.api import keras
@@ -7,6 +10,9 @@ print(tf.__version__)
 
 #%%
 
+DRAW = False
+image_base_path = 'generated'
+
 content_layers = ['block5_conv2']
 style_layers = ['block1_conv1', 'block2_conv1', 'block3_conv1', 'block4_conv1', 'block5_conv1']
 num_content_layers = len(content_layers)
@@ -14,6 +20,7 @@ num_style_layers = len(style_layers)
 
 style_weight=1e-2
 content_weight=1e4
+total_variation_weight=1e8
 
 #%%
 
@@ -30,30 +37,36 @@ def getVGGLayers(layer_names):
         print(l.name)
 
     outputs = [model.get_layer(name).output for name in layer_names]
-
-    # content_outputs = [model.get_layer(name).output for name in content_layers]
-    # style_outputs = [model.get_layer(name).output for name in style_layers]
-    # model_outputs = content_outputs + style_outputs
-
-    # return keras.Model([model.input], content_outputs), keras.Model([model.input], style_outputs)
     return keras.Model([model.input], outputs)
 
 #%%
 #############################
 # Create the loss functions #
 #############################
-
 def gram_matrix(input_tensor):
     result = tf.linalg.einsum('bijc,bijd->bcd', input_tensor, input_tensor)
     input_shape = tf.shape(input_tensor)
     num_locations = tf.cast(input_shape[1]*input_shape[2], tf.float32)
     return result/(num_locations)
 
+########################
+# Total variation loss #
+########################
+def high_pass_x_y(image):
+    x_var = image[:,:,1:,:] - image[:,:,:-1,:]
+    y_var = image[:,1:,:,:] - image[:,:-1,:,:]
+
+    return x_var, y_var
+
+def total_variation_loss(image):
+    x_deltas, y_deltas = high_pass_x_y(image)
+    return tf.reduce_mean(x_deltas**2) + tf.reduce_mean(y_deltas**2)
+
+
 #%%
 ##################################
 # Create the Style-Content Model #
 ##################################
-
 class StyleContentModel(tf.keras.models.Model):
     def __init__(self, style_layers, content_layers):
         super(StyleContentModel, self).__init__()
@@ -95,22 +108,26 @@ def styleContentLoss(outputs, style_targets, content_targets):
 
 #%%
 @tf.function()
-def train_step(extractor, image, style_targets, content_targets):
+def train_step(extractor, image, style_targets, content_targets, optimizer):
     with tf.GradientTape() as tape:
         outputs = extractor(image)
         loss = styleContentLoss(outputs, style_targets, content_targets)
+        loss += total_variation_weight*total_variation_loss(image)
 
     grad = tape.gradient(loss, image)
-    opt.apply_gradients([(grad, image)])
+    optimizer.apply_gradients([(grad, image)])
     image.assign(clip_0_1(image))
+    return loss
 
 #%%
-
-if __name__ == '__main__':
+#####################
+# Train the network #
+#####################
+def train():
     print('Training neural transfer model')
     # content_image = utils.load_img('./turtle.jpg')
     content_image = utils.load_img('./feiyang.jpg')
-    style_image = utils.load_img('./kandinsky.jpg')
+    style_image = utils.load_img('./van_gogh.jpeg')
 
     # utils.imshow(content_image, 'Content')
     # utils.imshow(style_image, 'Style')
@@ -121,7 +138,7 @@ if __name__ == '__main__':
 
     target_image = tf.Variable(content_image)
 
-    opt = tf.optimizers.Adam(learning_rate=0.02, beta_1=0.99, epsilon=1e-1)
+    optimizer = tf.optimizers.Adam(learning_rate=0.02, beta_1=0.99, epsilon=1e-1)
 
     epochs = 10
     steps_per_epoch = 100
@@ -129,20 +146,46 @@ if __name__ == '__main__':
     print('Start training')
 
     step_to_draw = 10
+    step_to_save_image = 100
+
+    start_time = time.time()
+    image_name = 'feiyang_van_gogh'
+    image_path = os.path.join(image_base_path, '{}_{}'.format(image_name, time.strftime("%Y-%m-%d-%H%M")))
+
+    utils.save_img(target_image, image_path, '{}_original'.format(image_name))
+
+    best_loss = 9000000000
+    best_image = None
 
     for n in range(epochs):
         for m in range(steps_per_epoch):
             step += 1
-            train_step(extractor, target_image, style_targets, content_targets)
+            loss = train_step(extractor, target_image, style_targets, content_targets, optimizer)
             # print(".", end='')
-            print('Epoch {}, epoch step {}, total step {}'.format(n, m, step))
+            print('Epoch {}, epoch step {}, total step {}, loss: {}'.format(n, m, step, loss))
 
-            # if step % step_to_draw == 0:
-            #     utils.imshow(target_image.read_value(), "Train step: {}".format(step))
+            if loss < best_loss:
+                best_loss = loss
+                best_image = target_image
 
-        utils.imshow(target_image.read_value(), "Train step: {}".format(step))
-    
-    utils.imshow(target_image.read_value(), "Final")
+            if step % step_to_save_image == 0:
+                utils.save_img(target_image, image_path, '{}_step_{}'.format(image_name, step))
+
+
+    utils.save_img(best_image, image_path, '{}_final'.format(image_name))
+
+
+#%%
+def handleArguments():
+    global DRAW
+    if len(sys.argv) > 1:
+        for arg in sys.argv[1:]:
+            if arg == '-d':
+                DRAW = True
+
+if __name__ == '__main__':
+    handleArguments()
+    train()
     
 
         
