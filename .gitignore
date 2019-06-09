@@ -1,0 +1,4 @@
+*.jpg
+*.jpeg
+.vscode/*
+__pycache__/*
