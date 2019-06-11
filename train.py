@@ -22,6 +22,13 @@ style_weight=1e-2
 content_weight=1e4
 total_variation_weight=1e8
 
+learning_rate = 0.02
+beta_1 = 0.99
+epsilon = 1e-1
+
+n_epochs = 10
+n_steps_per_epoch = 100
+
 #%%
 
 #####################################
@@ -125,8 +132,7 @@ def train_step(extractor, image, style_targets, content_targets, optimizer):
 #####################
 def train():
     print('Training neural transfer model')
-    # content_image = utils.load_img('./turtle.jpg')
-    content_image = utils.load_img('./feiyang.jpg')
+    content_image = utils.load_img('./karin.jpg')
     style_image = utils.load_img('./van_gogh.jpeg')
 
     # utils.imshow(content_image, 'Content')
@@ -138,10 +144,8 @@ def train():
 
     target_image = tf.Variable(content_image)
 
-    optimizer = tf.optimizers.Adam(learning_rate=0.02, beta_1=0.99, epsilon=1e-1)
+    optimizer = tf.optimizers.Adam(learning_rate=learning_rate, beta_1=beta_1, epsilon=epsilon)
 
-    epochs = 10
-    steps_per_epoch = 100
     step = 0
     print('Start training')
 
@@ -149,28 +153,27 @@ def train():
     step_to_save_image = 100
 
     start_time = time.time()
-    image_name = 'feiyang_van_gogh'
+    image_name = 'karin_van_gogh'
     image_path = os.path.join(image_base_path, '{}_{}'.format(image_name, time.strftime("%Y-%m-%d-%H%M")))
 
     utils.save_img(target_image, image_path, '{}_original'.format(image_name))
 
-    best_loss = 9000000000
+    best_loss = sys.maxsize
+
     best_image = None
 
-    for n in range(epochs):
-        for m in range(steps_per_epoch):
+    for epoch in range(n_epochs):
+        for epoch_step in range(n_steps_per_epoch):
             step += 1
             loss = train_step(extractor, target_image, style_targets, content_targets, optimizer)
-            # print(".", end='')
-            print('Epoch {}, epoch step {}, total step {}, loss: {}'.format(n, m, step, loss))
 
             if loss < best_loss:
                 best_loss = loss
                 best_image = target_image
 
+            print('Epoch {}, epoch step {}, total step {}, loss: {}, best loss {}'.format(epoch+1, epoch_step+1, step, loss, best_loss), end='\r')
             if step % step_to_save_image == 0:
                 utils.save_img(target_image, image_path, '{}_step_{}'.format(image_name, step))
-
 
     utils.save_img(best_image, image_path, '{}_final'.format(image_name))
 
