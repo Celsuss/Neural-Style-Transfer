@@ -130,14 +130,7 @@ def train_step(extractor, image, style_targets, content_targets, optimizer):
 #####################
 # Train the network #
 #####################
-def train():
-    print('Training neural transfer model')
-    content_image = utils.load_img('./karin.jpg')
-    style_image = utils.load_img('./van_gogh.jpeg')
-
-    # utils.imshow(content_image, 'Content')
-    # utils.imshow(style_image, 'Style')
-
+def train(content_image, style_image, target_name):
     extractor = StyleContentModel(style_layers, content_layers)
     style_targets = extractor(style_image)['style']
     content_targets = extractor(content_image)['content']
@@ -153,10 +146,9 @@ def train():
     step_to_save_image = 100
 
     start_time = time.time()
-    image_name = 'karin_van_gogh'
-    image_path = os.path.join(image_base_path, '{}_{}'.format(image_name, time.strftime("%Y-%m-%d-%H%M")))
+    image_path = os.path.join(image_base_path, '{}_{}'.format(target_name, time.strftime("%Y-%m-%d-%H%M")))
 
-    utils.save_img(target_image, image_path, '{}_original'.format(image_name))
+    utils.save_img(target_image, image_path, '{}_original'.format(target_name))
 
     best_loss = sys.maxsize
 
@@ -173,9 +165,9 @@ def train():
 
             print('Epoch {}, epoch step {}, total step {}, loss: {}, best loss {}'.format(epoch+1, epoch_step+1, step, loss, best_loss), end='\r')
             if step % step_to_save_image == 0:
-                utils.save_img(target_image, image_path, '{}_step_{}'.format(image_name, step))
+                utils.save_img(target_image, image_path, '{}_step_{}'.format(target_name, step))
 
-    utils.save_img(best_image, image_path, '{}_final'.format(image_name))
+    utils.save_img(best_image, image_path, '{}_final'.format(target_name))
 
 
 #%%
@@ -188,7 +180,14 @@ def handleArguments():
 
 if __name__ == '__main__':
     handleArguments()
-    train()
+
+    content_images, style_images = utils.loadContentAndStyleImages('./content', './style')
+
+    for style in style_images:
+        for content in content_images:
+            print('Training on content image: {} and style image: {}'.format(content, style))
+            img_name = '{}_{}'.format(content, style)
+            train(content_images[content], style_images[style], img_name)
     
 
         
