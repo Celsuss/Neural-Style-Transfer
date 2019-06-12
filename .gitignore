@@ -1,5 +1,9 @@
 *.jpg
 *.jpeg
 *.png
+
+!turtle.jpg
+!kandinsky.jpg
+
 .vscode/*
 __pycache__/*
