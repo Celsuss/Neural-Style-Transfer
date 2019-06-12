@@ -2,6 +2,8 @@ import IPython.display as display
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import tensorflow as tf
+import numpy as np
+import glob
 import os
 
 mpl.rcParams['figure.figsize'] = (12,12)
@@ -48,3 +50,40 @@ def imshow(image, title=None, draw=True):
 
 def draw():
     plt.show()
+
+def ensurePathExist(path):
+    if not os.path.isdir(path):
+        os.mkdir(path)
+
+def loadImages(path, file_ending):
+    path = os.path.join(path, '*.{}'.format(file_ending))
+    files = glob.glob(path)
+    images = {}
+
+    for f in files:
+        name = os.path.basename(f)[:-(len(file_ending)+1)]
+        image = load_img(f)
+        # images.append(image)
+        images[name] = image
+
+    return images
+
+def loadContentAndStyleImages(content_path, style_path):
+    ensurePathExist(content_path)
+    ensurePathExist(style_path)
+
+    file_endings = ['jpg', 'jpeg']
+    content = {}
+    style = {}
+
+    for ending in file_endings:
+        content_images = loadImages(content_path, ending)
+        style_images = loadImages(style_path, ending)
+
+        for img in content_images:
+            content[img] = content_images[img]
+        for img in style_images:
+            style[img] = style_images[img]
+
+
+    return content, style
