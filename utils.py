@@ -63,7 +63,6 @@ def loadImages(path, file_ending):
     for f in files:
         name = os.path.basename(f)[:-(len(file_ending)+1)]
         image = load_img(f)
-        # images.append(image)
         images[name] = image
 
     return images
