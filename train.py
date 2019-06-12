@@ -26,7 +26,7 @@ learning_rate = 0.02
 beta_1 = 0.99
 epsilon = 1e-1
 
-n_epochs = 10
+n_epochs = 5
 n_steps_per_epoch = 100
 
 #%%
@@ -142,7 +142,6 @@ def train(content_image, style_image, target_name):
     step = 0
     print('Start training')
 
-    step_to_draw = 10
     step_to_save_image = 100
 
     start_time = time.time()
@@ -175,7 +174,6 @@ def handleArguments():
     global DRAW
     if len(sys.argv) > 1:
         for arg in sys.argv[1:]:
-            if arg == '-d':
                 DRAW = True
 
 if __name__ == '__main__':

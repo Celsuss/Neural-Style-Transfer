@@ -26,6 +26,7 @@ def load_img(path):
     return img
 
 def save_img(image, path, name):
+    ensurePathExist(path)
     if not os.path.isdir(path):
         try:
             os.mkdir(path)
@@ -53,7 +54,7 @@ def draw():
 
 def ensurePathExist(path):
     if not os.path.isdir(path):
-        os.mkdir(path)
+        os.makedirs(path)
 
 def loadImages(path, file_ending):
     path = os.path.join(path, '*.{}'.format(file_ending))
