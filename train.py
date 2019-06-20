@@ -114,7 +114,7 @@ def styleContentLoss(outputs, style_targets, content_targets):
     return loss
 
 #%%
-@tf.function()
+# @tf.function()
 def train_step(extractor, image, style_targets, content_targets, optimizer):
     with tf.GradientTape() as tape:
         outputs = extractor(image)
