@@ -34,9 +34,15 @@ def save_img(image, path, name):
             print('Can\'t create path: {}'.format(os.path.join(os.getcwd(), path)))
             return
             
-    full_path = os.path.join(path, name+'.png')
-    print('Saving image {}'.format(full_path))
-    mpl.image.imsave(full_path, image[0])
+    image_np = image.numpy()
+    shape = image_np.shape
+    image_np = image_np.reshape([shape[1], shape[2], shape[3]])
+
+    full_file_path = os.path.join(path, name + '.png')
+    print('Saving image {}'.format(full_file_path))
+    mpl.image.imsave(full_file_path, image_np)
+
+    return 0
 
 def imshow(image, title=None, draw=True):
     if len(image.shape) > 3:

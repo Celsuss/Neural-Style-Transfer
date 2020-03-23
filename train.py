@@ -3,6 +3,7 @@ import os
 import sys
 import time
 import utils
+import numpy as np
 import tensorflow as tf
 from tensorflow.python.keras.api import keras
 
@@ -136,14 +137,11 @@ def train(content_image, style_image, target_name):
     content_targets = extractor(content_image)['content']
 
     target_image = tf.Variable(content_image)
+    img_np_2 = target_image.numpy()
 
     optimizer = tf.optimizers.Adam(learning_rate=learning_rate, beta_1=beta_1, epsilon=epsilon)
-
     step = 0
-    print('Start training')
-
     step_to_save_image = 100
-
     start_time = time.time()
     image_path = os.path.join(image_base_path, '{}_{}'.format(target_name, time.strftime("%Y-%m-%d-%H%M")))
 
@@ -153,6 +151,7 @@ def train(content_image, style_image, target_name):
 
     best_image = None
 
+    print('Start training')
     for epoch in range(n_epochs):
         for epoch_step in range(n_steps_per_epoch):
             step += 1
@@ -162,7 +161,7 @@ def train(content_image, style_image, target_name):
                 best_loss = loss
                 best_image = target_image
 
-            print('Epoch {}, epoch step {}, total step {}, loss: {}, best loss {}'.format(epoch+1, epoch_step+1, step, loss, best_loss), end='\r')
+            print('[Epoch {}/{}] step {}/{}, loss: {}, best loss {}'.format(epoch+1, n_epochs, epoch_step+1, n_steps_per_epoch, loss, best_loss), end='\r')
             if step % step_to_save_image == 0:
                 utils.save_img(target_image, image_path, '{}_step_{}'.format(target_name, step))
 
