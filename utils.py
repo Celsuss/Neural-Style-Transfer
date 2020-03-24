@@ -39,7 +39,7 @@ def save_img(image, path, name):
     image_np = image_np.reshape([shape[1], shape[2], shape[3]])
 
     full_file_path = os.path.join(path, name + '.png')
-    print('Saving image {}'.format(full_file_path))
+    print('\nSaving image {}'.format(full_file_path))
     mpl.image.imsave(full_file_path, image_np)
 
     return 0
