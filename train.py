@@ -169,14 +169,29 @@ def train(content_image, style_image, target_name):
 
 
 #%%
-def handleArguments():
+def handleArguments(settings):
     global DRAW
-    if len(sys.argv) > 1:
-        for arg in sys.argv[1:]:
-                DRAW = True
+
+    length = len(sys.argv[1:])
+    for i in range(1, length+1):
+        arg1 = sys.argv[i]
+        if i >= length:
+            arg2 = None
+        else:
+            arg2 = sys.argv[i+1]
+
+        print('arg1: {}, arg2: {}'.format(arg1, arg2))
+
+        if arg1 == '-d' or arg1 == '--draw':
+            DRAW = True
+            print('draw')
+        elif (arg1 == '-e' or arg1 == '--epochs') and arg2 is not None:
+            print('epochs {}'.format(arg2))
+
 
 if __name__ == '__main__':
-    handleArguments()
+    settings = {}
+    handleArguments(settings)
 
     content_images, style_images = utils.loadContentAndStyleImages('./content', './style')
 
