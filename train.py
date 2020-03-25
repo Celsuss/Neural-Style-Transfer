@@ -11,7 +11,6 @@ print(tf.__version__)
 
 #%%
 
-DRAW = False
 image_base_path = 'generated'
 
 content_layers = ['block5_conv2']
@@ -131,7 +130,7 @@ def train_step(extractor, image, style_targets, content_targets, optimizer):
 #####################
 # Train the network #
 #####################
-def train(content_image, style_image, target_name):
+def train(content_image, style_image, target_name, settings=None):
     extractor = StyleContentModel(style_layers, content_layers)
     style_targets = extractor(style_image)['style']
     content_targets = extractor(content_image)['content']
@@ -147,8 +146,10 @@ def train(content_image, style_image, target_name):
 
     utils.save_img(target_image, image_path, '{}_original'.format(target_name))
 
-    best_loss = sys.maxsize
+    if 'epochs' in settings:
+        n_epochs = settings['epochs']
 
+    best_loss = sys.maxsize
     best_image = None
 
     print('Start training')
@@ -170,8 +171,6 @@ def train(content_image, style_image, target_name):
 
 #%%
 def handleArguments(settings):
-    global DRAW
-
     length = len(sys.argv[1:])
     for i in range(1, length+1):
         arg1 = sys.argv[i]
@@ -180,13 +179,10 @@ def handleArguments(settings):
         else:
             arg2 = sys.argv[i+1]
 
-        print('arg1: {}, arg2: {}'.format(arg1, arg2))
-
         if arg1 == '-d' or arg1 == '--draw':
-            DRAW = True
-            print('draw')
+            settings['draw'] = True
         elif (arg1 == '-e' or arg1 == '--epochs') and arg2 is not None:
-            print('epochs {}'.format(arg2))
+            settings['epochs'] = int(arg2)
 
 
 if __name__ == '__main__':
@@ -199,7 +195,7 @@ if __name__ == '__main__':
         for content in content_images:
             print('Training on content image: {} and style image: {}'.format(content, style))
             img_name = '{}_{}'.format(content, style)
-            train(content_images[content], style_images[style], img_name)
+            train(content_images[content], style_images[style], img_name, settings=settings)
     
 
         
