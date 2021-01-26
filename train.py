@@ -131,6 +131,7 @@ def train_step(extractor, image, style_targets, content_targets, optimizer):
 # Train the network #
 #####################
 def train(content_image, style_image, target_name, settings=None):
+    global n_epochs
     extractor = StyleContentModel(style_layers, content_layers)
     style_targets = extractor(style_image)['style']
     content_targets = extractor(content_image)['content']
