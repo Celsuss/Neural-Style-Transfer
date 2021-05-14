@@ -130,7 +130,12 @@ def train_step(extractor, image, style_targets, content_targets, optimizer):
 #####################
 # Train the network #
 #####################
+<<<<<<< HEAD
 def train(content_image, style_image, target_name, settings=None, n_epochs=5):
+=======
+def train(content_image, style_image, target_name, settings=None):
+    global n_epochs
+>>>>>>> 8b522ed10e41699528c6f8cadb0eb9a9d8559eae
     extractor = StyleContentModel(style_layers, content_layers)
     style_targets = extractor(style_image)['style']
     content_targets = extractor(content_image)['content']
