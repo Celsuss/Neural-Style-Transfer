@@ -7,7 +7,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.python.keras.api import keras
 
-print(tf.__version__)
+print('Tensorflow version: {}'.format(tf.__version__))
 
 #%%
 
@@ -130,7 +130,7 @@ def train_step(extractor, image, style_targets, content_targets, optimizer):
 #####################
 # Train the network #
 #####################
-def train(content_image, style_image, target_name, settings=None):
+def train(content_image, style_image, target_name, settings=None, n_epochs=5):
     extractor = StyleContentModel(style_layers, content_layers)
     style_targets = extractor(style_image)['style']
     content_targets = extractor(content_image)['content']
@@ -190,12 +190,17 @@ if __name__ == '__main__':
     handleArguments(settings)
 
     content_images, style_images = utils.loadContentAndStyleImages('./content', './style')
+    
+    if len(content_images) == 0:
+        print('No content images found')
+    if len(style_images) == 0:
+        print('No style images found')
 
     for style in style_images:
         for content in content_images:
             print('Training on content image: {} and style image: {}'.format(content, style))
             img_name = '{}_{}'.format(content, style)
-            train(content_images[content], style_images[style], img_name, settings=settings)
+            train(content_images[content], style_images[style], img_name, settings=settings, n_epochs=n_epochs)
     
 
         

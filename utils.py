@@ -78,7 +78,7 @@ def loadContentAndStyleImages(content_path, style_path):
     ensurePathExist(content_path)
     ensurePathExist(style_path)
 
-    file_endings = ['jpg', 'jpeg']
+    file_endings = ['jpg', 'jpeg', 'png']
     content = {}
     style = {}
 
