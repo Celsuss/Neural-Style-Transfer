@@ -12,46 +12,52 @@
             margin: auto;
         }
 
-        .image_upload{
+        .image_upload_container{
             width: 100%;
-            overflow: hidden;
-
-            border: 1px solid black;
-        }
-
-        .content_image_upload{
-            width: 50%;
             float: left;
             border: 1px solid black;
         }
 
-        .style_image_upload{
-            border: 1px solid black;
+        .image_upload{
+            width: 50%;
+            float: left;
         }
+
+        .preview_image{
+            display: none;
+            width: 100%;
+        }
+
+        .preview_default_text{
+            display: none;
+        }
+
+
     </style>
 </head>
 <body>
     <div class="content">
         <h1>Neural Style Transfer</h1>
 
-        <div class="image_upload">
-            <div class="content_image_upload">
+        <div class="image_upload_container">
+            <div class="image_upload">
                 <p>Chose the content picture</p>
 
                 <input type="file" name="contentInputFile" id="contentInputFile">
                 <div class="content_image_preview" id="contentImagePreview">
-                    <img src="" alt="Content Image Preview" class="content_image_preview_image">
-                    <span class="content_image_preview_default_text">Content Image Preview</span>
+                    <img src="" alt="Content Image Preview" class="preview_image">
+                    <span class="preview_default_text">Content Image Preview</span>
                 </div>
             </div>
 
-            <div class="style_image_upload">
+            <div class="image_upload">
                 <p>Chose the style picture</p>
 
                 <input type="file" name="styleInputFile" id="styleInputFile">
+                <!-- Image Preview -->
                 <div class="style_image_preview" id="styleImagePreview">
-                    <img src="" alt="Style Image Preview" class="style_image_preview_image">
-                    <span class="style_image_preview_default_text">Style Image Preview</span>
+                    <img src="" alt="Style Image Preview" class="preview_image">
+                    <span class="preview_default_text">Style Image Preview</span>
                 </div>
             </div>
 
