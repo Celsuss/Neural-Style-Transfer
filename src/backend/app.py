@@ -8,7 +8,7 @@ app.config['SECRET_KEY'] = os.urandom(24)
 
 @app.route('/')
 def test():
-    return "Neural Style Transfer"
+    return "Neural Style Transfer v1"
 
 @app.route('/test', methods=['GET'])
 def test_get():

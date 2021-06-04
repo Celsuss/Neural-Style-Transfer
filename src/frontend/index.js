@@ -45,3 +45,14 @@ contentInpFile.addEventListener("change", function(){
 styleInpFile.addEventListener("change", function(){
     selectUploadFile(this.files[0], stylePreviewImage, styleDefaultText);
 });
+
+
+// Upload images to backend
+
+function uploadImages(){
+
+}
+
+
+
+var contentImage = contentPreviewImage.getAttribute("src");
