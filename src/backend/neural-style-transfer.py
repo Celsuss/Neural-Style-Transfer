@@ -1,4 +1,6 @@
 import tensorflow as tf
+import numpy as np
+import PIL.Image
 
 content_layers = ['block5_conv2'] 
 
@@ -22,11 +24,19 @@ def vggLayers(layer_names):
     model = tf.keras.Model([vgg.input], outputs)
     return model
 
-def gram_matrix(input_tensor):
+def gramMatrix(input_tensor):
     result = tf.linalg.einsum('bijc,bijd->bcd', input_tensor, input_tensor)
     input_shape = tf.shape(input_tensor)
     num_locations = tf.cast(input_shape[1]*input_shape[2], tf.float32)
     return result/(num_locations)
+
+def tensorToImage(tensor):
+    tensor = tensor*255
+    tensor = np.array(tensor, dtype=np.uint8)
+    if np.ndim(tensor)>3:
+        assert tensor.shape[0] == 1
+    tensor = tensor[0]
+    return PIL.Image.fromarray(tensor)
 
 class StyleContentModel(tf.keras.models.Model):
     def __init__(self, style_layers, content_layers):
@@ -45,7 +55,7 @@ class StyleContentModel(tf.keras.models.Model):
         outputs = self.vgg(preprocessed_input)
 
         style_outputs, content_outputs = (outputs[:self.num_style_layers], outputs[self.num_style_layers:])
-        style_outputs = [gram_matrix(style_output) for style_output in style_outputs]
+        style_outputs = [gramMatrix(style_output) for style_output in style_outputs]
 
         content_dict = {content_name:value for content_name, value in zip(self.content_layers, content_outputs)}
         style_dict = {style_name:value for style_name, value in zip(self.style_layers, style_outputs)}
@@ -54,7 +64,7 @@ class StyleContentModel(tf.keras.models.Model):
 def clip_0_1(image):
     return tf.clip_by_value(image, clip_value_min=0.0, clip_value_max=1.0)
 
-def style_content_loss(outputs, style_targets, style_weight, content_targets, content_weight):
+def styleContentLoss(outputs, style_targets, style_weight, content_targets, content_weight):
     style_outputs = outputs['style']
     content_outputs = outputs['content']
 
@@ -70,10 +80,10 @@ def style_content_loss(outputs, style_targets, style_weight, content_targets, co
     return loss
 
 @tf.function()
-def train_step(image, optimizer, extractor, style_targets, style_weight, content_targets, content_weight):
+def trainStep(image, optimizer, extractor, style_targets, style_weight, content_targets, content_weight):
     with tf.GradientTape() as tape:
         outputs = extractor(image)
-        loss = style_content_loss(outputs, style_targets, style_weight, content_targets, content_weight)
+        loss = styleContentLoss(outputs, style_targets, style_weight, content_targets, content_weight)
 
         grad = tape.gradient(loss, image)
         optimizer.apply_gradients([(grad, image)])
@@ -88,8 +98,14 @@ def trainModel(extractor, style_image, content_image):
     style_weight=1e-2
     content_weight=1e4
 
+    trainStep(image, optimizer, extractor, style_targets, style_weight, content_targets, content_weight)
+    trainStep(image, optimizer, extractor, style_targets, style_weight, content_targets, content_weight)
+    trainStep(image, optimizer, extractor, style_targets, style_weight, content_targets, content_weight)
+    return tensorToImage(image)
+
 
 def styleTransfer(style_image, content_image):
+    print('Starting style transfer')
     style_extractor = vggLayers(style_layers)
     style_outputs = style_extractor(style_image*255)
 
