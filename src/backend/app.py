@@ -4,6 +4,12 @@ import os
 supported_types = ['jpg', 'png'] 
 app = Flask(__name__) 
 
+from flask_cors import CORS
+
+# cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+cors = CORS(app)
+
+app.config['CORS_HEADERS'] = 'Content-Type'
 app.config['SECRET_KEY'] = os.urandom(24)
 
 @app.route('/')
@@ -17,14 +23,20 @@ def test_get():
 @app.route('/post_images', methods=['POST'])
 def post_images():
     # POST
-    content_file = request.files['content_file']
+    print('Post images')
+    
+    files = request.files.to_dict()
+
+    if 'content_file' not in files or 'style_file' not in files:
+        return make_response(jsonify({'status': 'ok'}), 200)
+
+    content_file = files['content_file']
     style_file = request.files['style_file']
 
-    if content_file and style_file:
-        res = make_response(jsonify({"status": "SUCCESS", "msg": "No file uploaded"}), 200)
-    else:
-        res = make_response(jsonify({"status": "FAIL", "msg": "No file uploaded"}), 400)
+    res = make_response(jsonify({"status": "SUCCESS", "msg": "Files uploaded"}), 200)
     return res
 
+
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0', port=5000)
+

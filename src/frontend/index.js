@@ -1,4 +1,4 @@
-
+var data = new FormData();
 
 // Image Upload
 const contentInpFile = document.getElementById("contentInputFile");
@@ -14,7 +14,7 @@ const contentDefaultText = contentPreviewContainer.querySelector(".preview_defau
 const stylePreviewImage = stylePreviewContainer.querySelector(".preview_image");
 const styleDefaultText = stylePreviewContainer.querySelector(".preview_default_text");
 
-function selectUploadFile(file, previewImage, previewDefaultText){
+function selectUploadFile(file, previewImage, previewDefaultText, dataFileKey){
     if(file){
         previewImage.style.display = "block";
         previewDefaultText.style.display = "none";
@@ -23,9 +23,8 @@ function selectUploadFile(file, previewImage, previewDefaultText){
         reader.addEventListener("load", function(){
             previewImage.setAttribute("src", this.result);
 
-            data = new FormData();
-            // data.append('model_name', model);
-            // data.append('file', file);
+            data.append(dataFileKey, file);
+            console.log("File set for " + dataFileKey);
         });
         reader.readAsDataURL(file);
     }
@@ -40,19 +39,39 @@ function selectUploadFile(file, previewImage, previewDefaultText){
 // contentInpFile.addEventListener("change", function(){selectUploadFile(contentPreviewImage, contentDefaultText)});
 // styleInpFile.addEventListener("change", function(){selectUploadFile(stylePreviewImage, styleDefaultText)});
 contentInpFile.addEventListener("change", function(){
-    selectUploadFile(this.files[0], contentPreviewImage, contentDefaultText);
+    selectUploadFile(this.files[0], contentPreviewImage, contentDefaultText, 'content_file');
 });
 styleInpFile.addEventListener("change", function(){
-    selectUploadFile(this.files[0], stylePreviewImage, styleDefaultText);
+    selectUploadFile(this.files[0], stylePreviewImage, styleDefaultText, 'style_file');
 });
 
-
 // Upload images to backend
-
 function uploadImages(){
-
+    const postImages = async() => {
+        const response = await fetch('http://127.0.0.1:5000/post_images',{
+            method: 'POST',
+            body : data,
+            headers: {
+                'credentials': "same-origin",
+                'credentials': "include",
+                'Origin': 'http://localhost:5500/'
+            }
+        })
+        .then(function(response) {
+            if (response.status !== 200){
+                response.json().then(function(body){
+                    console.log(`Status code: ${response.status}, Mrror message ${body["msg"]}`);
+                });
+            }
+            else{
+                response.json().then(function(body){
+                    console.log(`Sucess! \nStatus code: ${response.status}, Message ${body["msg"]}`);
+                });
+            }
+        });
+    }
+    postImages();
 }
 
-
-
-var contentImage = contentPreviewImage.getAttribute("src");
+const imageUploadButton = document.getElementById("imageUploadButton");
+imageUploadButton.addEventListener("click", uploadImages);
