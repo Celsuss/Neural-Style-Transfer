@@ -44,6 +44,7 @@ def post_images():
     styleFile = request.files['style_file']
 
     # jobId = run_task(contentFile, styleFile)
+    jobId = '0'
 
     res = make_response(jsonify({"status": "SUCCESS", "data": {"job_id": jobId}, "msg": "Files uploaded"}), 202)
     return res
