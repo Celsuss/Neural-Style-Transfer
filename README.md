@@ -12,3 +12,5 @@ Spin up the containers attached:
 ``` python
 $ docker-compose up --build
 ```
+
+Open your browser to http://localhost to view the app 
