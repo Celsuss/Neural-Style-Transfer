@@ -58,14 +58,15 @@ function uploadImages(){
             }
         })
         .then(function(response) {
-            if (response.status !== 200){
+            if (response.status !== 202){
                 response.json().then(function(body){
-                    console.log(`Status code: ${response.status}, Mrror message ${body["msg"]}`);
+                    console.log(`Status code: ${response.status}, Error message ${body["msg"]}`);
                 });
             }
             else{
                 response.json().then(function(body){
-                    console.log(`Sucess! \nStatus code: ${response.status}, Message ${body["msg"]}`);
+                    console.log(`Sucess! \nStatus code: ${response.status}, Message: ${body["msg"]}, Task ID: ${body["data"]["task_id"]}`);
+                    console.log(body); 
                 });
             }
         });
@@ -75,3 +76,8 @@ function uploadImages(){
 
 const imageUploadButton = document.getElementById("imageUploadButton");
 imageUploadButton.addEventListener("click", uploadImages);
+
+// Listen for job status
+function getJobStatus(){
+
+}

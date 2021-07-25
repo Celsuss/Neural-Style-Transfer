@@ -28,8 +28,9 @@ def run_task(contentFile, styleFile):
     redis_conn = redis.Redis()
     q = Queue(connection=redis_conn)  # no args implies the default queue
     job = q.enqueue(create_task, contentFile, styleFile)
-    return job.get_id()
+    return job
 
+"""Upload images and start a task to create a new image"""
 @app.route('/post_images', methods=['POST'])
 def post_images():
     # POST
@@ -38,16 +39,49 @@ def post_images():
     files = request.files.to_dict()
 
     if 'content_file' not in files or 'style_file' not in files:
-        return make_response(jsonify({'status': 'fail', "msg": "Content or style file missing"}), 400)
+        return make_response(jsonify({'error': 'fail', "msg": "Content or style file missing"}), 400)
 
     contentFile = files['content_file']
     styleFile = request.files['style_file']
 
-    # jobId = run_task(contentFile, styleFile)
-    jobId = '0'
+    # task = run_task(contentFile, styleFile)
 
-    res = make_response(jsonify({"status": "SUCCESS", "data": {"job_id": jobId}, "msg": "Files uploaded"}), 202)
+    response_object = {
+        "status": "success",
+        "msg": "Images uploaded",
+        "data": {
+            "task_id": "0" # task.get_id()
+        },
+    }
+    res = make_response(jsonify(response_object), 202)
     return res
+
+"""Get Status from job"""
+@app.route('/jobs/get_job_status', methods=['GET'])
+def get_job_status(task_id):
+    # GET
+    print('Get task status')
+
+    redisURL = 'redis://redis:6379/0'
+    with Connection(redis.from_url(redisURL)):
+        q = Queue()
+        task = q.fetch_job(task_id)
+    if task:
+        response_code = 200
+        response_object = {
+            "status": "success",
+            "data": {
+                "task_id": task.get_id(),
+                "task_status": task.get_status(),
+                "task_result": task.result,
+            },
+        }
+    else:
+        response_code = 400
+        response_object = {"status": "error"}
+
+    return make_response(jsonify(response_object), response_code)
+
 
 
 if __name__ == '__main__':
