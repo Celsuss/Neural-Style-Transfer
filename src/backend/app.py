@@ -19,10 +19,7 @@ app.config['SECRET_KEY'] = os.urandom(24)
 def test():
     return "Neural Style Transfer v1"
 
-@app.route('/test', methods=['GET'])
-def test_get():
-    return 'Just a test!'
-
+"""Add task to queue"""
 def run_task(contentFile, styleFile):
     # Tell RQ what Redis connection to use
     redis_conn = redis.Redis()
@@ -81,8 +78,6 @@ def get_job_status(task_id):
         response_object = {"status": "error"}
 
     return make_response(jsonify(response_object), response_code)
-
-
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
