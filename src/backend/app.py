@@ -1,12 +1,15 @@
 from flask import Flask, request, make_response, jsonify
+from rq import Queue, Connection
+import redis
 import os
+
+from main import create_task
 
 supported_types = ['jpg', 'png'] 
 app = Flask(__name__) 
 
 from flask_cors import CORS
 
-# cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 cors = CORS(app)
 
 app.config['CORS_HEADERS'] = 'Content-Type'
@@ -20,6 +23,13 @@ def test():
 def test_get():
     return 'Just a test!'
 
+def run_task(contentFile, styleFile):
+    # Tell RQ what Redis connection to use
+    redis_conn = redis.Redis()
+    q = Queue(connection=redis_conn)  # no args implies the default queue
+    job = q.enqueue(create_task, contentFile, styleFile)
+    return job.get_id()
+
 @app.route('/post_images', methods=['POST'])
 def post_images():
     # POST
@@ -28,12 +38,14 @@ def post_images():
     files = request.files.to_dict()
 
     if 'content_file' not in files or 'style_file' not in files:
-        return make_response(jsonify({'status': 'ok'}), 200)
+        return make_response(jsonify({'status': 'fail', "msg": "Content or style file missing"}), 400)
 
-    content_file = files['content_file']
-    style_file = request.files['style_file']
+    contentFile = files['content_file']
+    styleFile = request.files['style_file']
 
-    res = make_response(jsonify({"status": "SUCCESS", "msg": "Files uploaded"}), 200)
+    # jobId = run_task(contentFile, styleFile)
+
+    res = make_response(jsonify({"status": "SUCCESS", "data": {"job_id": jobId}, "msg": "Files uploaded"}), 202)
     return res
 
 

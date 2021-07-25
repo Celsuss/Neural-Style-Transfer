@@ -6,6 +6,8 @@
 !kandinsky.jpg
 
 __pycache__/*
+src/backend/__pycache__/*
+
 .vscode/*
 
 style_/*

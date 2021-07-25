@@ -3,10 +3,26 @@ version: "3.9"
 services:
     backend-service:
         build: ./src/backend/
+        image: backend-service
         ports:
             - "5000:5000"
+        command: python app.py
         volumes: 
             - ./src/backend/:/app
+        depends_on:
+            - redis
+
+    backend-worker-service:
+        image: backend-service
+        command: python worker/worker.py
+        volumes:
+            - ./src/backend/worker/:/app/worker
+        depends_on:
+            - redis
+            - backend-service
+
+    redis:
+        image: redis:6-alpine
         
     frontend-service:
         build: ./src/frontend/
