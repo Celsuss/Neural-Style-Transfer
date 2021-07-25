@@ -1,12 +1,14 @@
-# Neural-Style-Transfer
-Neural Style Transfer
+# Neural Style Transfer using Flask Redis Queue
+Neural Style Transfer using Tensorflow, Flask, Redis Queue and Docker
+for the backend and JavaScript for the frontend.
 
-## How to run
-Put content images that you want to apply the style transfer on in the 'content' directory
-and the style images in the 'style' directory.
-Generated files will be saved in the 'generated' directory.
-Run the train.py script to start the neural transfer.
+## Quick Start
+Spin up the containers in the background:
+``` python
+$ docker-compose up -d --build
+```
 
-## Dependencies
-
-Install dependencies using "pip install -r requirements.txt"
+Spin up the containers attached:
+``` python
+$ docker-compose up --build
+```
