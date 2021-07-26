@@ -39,6 +39,14 @@
             margin-top: 150px;
         }
 
+        .job_results_container{
+            text-align: center;
+        }
+
+        .job_results_text{
+            display: none;
+        }
+
     </style>
 </head>
 <body>
@@ -69,8 +77,20 @@
             </div>
         </div>
         
+        <!-- Upload images and start job -->
         <div class="image_upload_container">
             <button class="image_upload_button" id="imageUploadButton">Transfer Style</button>
+        </div>
+
+        <!-- Job results -->
+        <div class="job_results_container">
+            <div class="job_results_text">
+                <p>Job Status</p>
+            </div>
+            <div class="job_results_image_preview">
+                <!-- <img src="" alt="Results Image Preview"> -->
+                <img src="" alt="Results Image Preview" class="preview_image">
+            </div>
 
         </div>
 

@@ -67,6 +67,7 @@ function uploadImages(){
                 response.json().then(function(body){
                     console.log(`Sucess! \nStatus code: ${response.status}, Message: ${body["msg"]}, Task ID: ${body["data"]["task_id"]}`);
                     console.log(body); 
+                    // Call updateTaskStatus() to update the task status in the backend
                 });
             }
         });
@@ -78,6 +79,29 @@ const imageUploadButton = document.getElementById("imageUploadButton");
 imageUploadButton.addEventListener("click", uploadImages);
 
 // Listen for job status
-function getJobStatus(){
-
+function updateTaskStatus(){
+    const getTaskStatus = async() => {
+        const response = await fetch('http://127.0.0.1:5000/jobs/get_job_status',{
+            method: 'GET',
+            // body : data,
+            headers: {
+                'credentials': "same-origin",
+                'credentials': "include",
+                'Origin': 'http://localhost:5500/'
+            }
+        })
+        .then(function(response) {
+            if (response.status !== 202){
+                response.json().then(function(body){
+                    console.log(`Status code: ${response.status}, Error message ${body["msg"]}`);
+                });
+            }
+            else{
+                response.json().then(function(body){
+                    console.log(`Sucess! \nStatus code: ${response.status}`);
+                    console.log(body); 
+                });
+            }
+        });
+    }
 }
