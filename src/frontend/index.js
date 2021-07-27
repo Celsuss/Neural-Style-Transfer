@@ -65,9 +65,9 @@ function uploadImages(){
             }
             else{
                 response.json().then(function(body){
-                    console.log(`Sucess! \nStatus code: ${response.status}, Message: ${body["msg"]}, Task ID: ${body["data"]["task_id"]}`);
+                    console.log(`Sucess! \nStatus code: ${response.status}, Message: ${body["msg"]}, Job ID: ${body["data"]["job_id"]}`);
                     console.log(body); 
-                    // Call updateTaskStatus() to update the task status in the backend
+                    // Call updateJobStatus() to update the job status in the backend
                 });
             }
         });
@@ -79,11 +79,10 @@ const imageUploadButton = document.getElementById("imageUploadButton");
 imageUploadButton.addEventListener("click", uploadImages);
 
 // Listen for job status
-function updateTaskStatus(){
-    const getTaskStatus = async() => {
-        const response = await fetch('http://127.0.0.1:5000/jobs/get_job_status',{
+function updateJobStatus(){
+    const getJobStatus = async() => {
+        const response = await fetch('http://127.0.0.1:5000/jobs/get_job_status/test',{
             method: 'GET',
-            // body : data,
             headers: {
                 'credentials': "same-origin",
                 'credentials': "include",
@@ -104,4 +103,8 @@ function updateTaskStatus(){
             }
         });
     }
+    getJobStatus();
 }
+
+const jobStatusButton = document.getElementById("jobStatusButtonTest");
+jobStatusButton.addEventListener("click", updateJobStatus);

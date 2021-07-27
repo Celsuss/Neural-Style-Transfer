@@ -1,5 +1,5 @@
 import time
 
-def create_task(contentFile, styleFile):
+def create_job(contentFile, styleFile):
     time.sleep(5)
     return True

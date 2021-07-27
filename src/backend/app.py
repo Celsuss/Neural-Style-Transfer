@@ -3,7 +3,7 @@ from rq import Queue, Connection
 import redis
 import os
 
-from main import create_task
+from main import create_job
 
 supported_types = ['jpg', 'png'] 
 app = Flask(__name__) 
@@ -19,15 +19,15 @@ app.config['SECRET_KEY'] = os.urandom(24)
 def test():
     return "Neural Style Transfer v1"
 
-"""Add task to queue"""
-def run_task(contentFile, styleFile):
+"""Add job to queue"""
+def run_job(contentFile, styleFile):
     # Tell RQ what Redis connection to use
     redis_conn = redis.Redis()
-    q = Queue(connection=redis_conn)  # no args implies the default queue
-    job = q.enqueue(create_task, contentFile, styleFile)
+    q = Queue(connection=redis_conn)
+    job = q.enqueue(create_job, contentFile, styleFile)
     return job
 
-"""Upload images and start a task to create a new image"""
+"""Upload images and start a job to create a new image"""
 @app.route('/post_images', methods=['POST'])
 def post_images():
     # POST
@@ -41,36 +41,38 @@ def post_images():
     contentFile = files['content_file']
     styleFile = request.files['style_file']
 
-    # task = run_task(contentFile, styleFile)
+    # job = run_job(contentFile, styleFile)
 
     response_object = {
         "status": "success",
         "msg": "Images uploaded",
         "data": {
-            "task_id": "0" # task.get_id()
+            "job_id": "0" # job.get_id()
         },
     }
     res = make_response(jsonify(response_object), 202)
     return res
 
 """Get Status from job"""
-@app.route('/jobs/get_job_status', methods=['GET'])
-def get_job_status(task_id):
+@app.route('/jobs/get_job_status/<job_id>', methods=['GET'])
+def get_job_status(job_id):
     # GET
-    print('Get task status')
+    print('Get job status')
+
+    return make_response(jsonify({'status': 'success', 'msg': 'Job status retrieved: {}'.format(job_id)}), 202)
 
     redisURL = 'redis://redis:6379/0'
     with Connection(redis.from_url(redisURL)):
         q = Queue()
-        task = q.fetch_job(task_id)
-    if task:
+        job = q.fetch_job(job_id)
+    if job:
         response_code = 200
         response_object = {
             "status": "success",
             "data": {
-                "task_id": task.get_id(),
-                "task_status": task.get_status(),
-                "task_result": task.result,
+                "job_id": job.get_id(),
+                "job_status": job.get_status(),
+                "job_result": job.result,
             },
         }
     else:
