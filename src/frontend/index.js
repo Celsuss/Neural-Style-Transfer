@@ -79,6 +79,9 @@ function uploadImages(){
     postImages();
 }
 
+// Update job status
+const jobStatusText = document.getElementById("jobStatusText");
+
 const imageUploadButton = document.getElementById("imageUploadButton");
 imageUploadButton.addEventListener("click", uploadImages);
 
@@ -105,6 +108,9 @@ function updateJobStatus(){
                     console.log(`Sucess! \nStatus code: ${response.status}`);
                     console.log(body); 
 
+                    jobStatusText.innerHTML = body["data"]["job_status"];
+                    jobStatusText.style.display = 'initial';
+                    
                     if(body["data"]["job_status"] === "finished"){
                         console.log("Job finished!");
                     }
@@ -121,6 +127,3 @@ function updateJobStatus(){
     }
     getJobStatus();
 }
-
-const jobStatusButton = document.getElementById("jobStatusButtonTest");
-jobStatusButton.addEventListener("click", updateJobStatus);
