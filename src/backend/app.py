@@ -58,7 +58,7 @@ def post_images():
         "status": "success",
         "msg": "Images uploaded",
         "data": {
-            "job_id": "0" # job.get_id()
+            "job_id": job.get_id()
         },
     }
     res = make_response(jsonify(response_object), 202)
