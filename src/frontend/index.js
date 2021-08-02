@@ -1,4 +1,5 @@
 var data = new FormData();
+var jobId = "";
 
 // Image Upload
 const contentInpFile = document.getElementById("contentInputFile");
@@ -58,6 +59,7 @@ function uploadImages(){
             }
         })
         .then(function(response) {
+            // TODO: Move error to the else statment
             if (response.status !== 202){
                 response.json().then(function(body){
                     console.log(`Status code: ${response.status}, Error message ${body["msg"]}`);
@@ -65,9 +67,10 @@ function uploadImages(){
             }
             else{
                 response.json().then(function(body){
-                    console.log(`Sucess! \nStatus code: ${response.status}, Message: ${body["msg"]}, Job ID: ${body["data"]["job_id"]}`);
-                    console.log(body); 
-                    // Call updateJobStatus() to update the job status in the backend
+                    jobId = body["data"]["job_id"];
+                    console.log(`Sucess! \nStatus code: ${response.status}, Message: ${body["msg"]}, Job ID: ${jobId}`);
+                    console.log(body);
+                    // Call updateJobStatus() to get the job status in the backend
                 });
             }
         });
@@ -81,7 +84,7 @@ imageUploadButton.addEventListener("click", uploadImages);
 // Listen for job status
 function updateJobStatus(){
     const getJobStatus = async() => {
-        const response = await fetch('http://127.0.0.1:5000/jobs/get_job_status/test',{
+        const response = await fetch(`http://127.0.0.1:5000/jobs/get_job_status/${jobId}`,{
             method: 'GET',
             headers: {
                 'credentials': "same-origin",
@@ -90,7 +93,8 @@ function updateJobStatus(){
             }
         })
         .then(function(response) {
-            if (response.status !== 202){
+            // TODO: Move error to the else statment
+            if (response.status !== 200){
                 response.json().then(function(body){
                     console.log(`Status code: ${response.status}, Error message ${body["msg"]}`);
                 });

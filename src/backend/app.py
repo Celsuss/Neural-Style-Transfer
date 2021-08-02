@@ -68,9 +68,7 @@ def post_images():
 @app.route('/jobs/get_job_status/<job_id>', methods=['GET'])
 def get_job_status(job_id):
     # GET
-    print('Get job status')
-
-    return make_response(jsonify({'status': 'success', 'msg': 'Job status retrieved: {}'.format(job_id)}), 202)
+    print('Get job status for job: {}'.format(job_id))
 
     # TODO: Move redisURL to a config file
     redisURL = 'redis://redis:6379/0'
