@@ -26,8 +26,7 @@ def run_job(contentFile, styleFile):
     redisURL = 'redis://redis:6379/0'
     with Connection(redis.from_url(redisURL)):
         q = Queue()
-        job = q.enqueue(test_print)
-        # job = q.enqueue(create_job, contentFile, styleFile)
+        job = q.enqueue(create_job, contentFile, styleFile)
         return job
 
 """Upload images and start a job to create a new image"""

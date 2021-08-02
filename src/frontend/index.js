@@ -70,7 +70,8 @@ function uploadImages(){
                     jobId = body["data"]["job_id"];
                     console.log(`Sucess! \nStatus code: ${response.status}, Message: ${body["msg"]}, Job ID: ${jobId}`);
                     console.log(body);
-                    // Call updateJobStatus() to get the job status in the backend
+
+                    setTimeout(updateJobStatus, 1000);
                 });
             }
         });
@@ -103,6 +104,17 @@ function updateJobStatus(){
                 response.json().then(function(body){
                     console.log(`Sucess! \nStatus code: ${response.status}`);
                     console.log(body); 
+
+                    if(body["data"]["job_status"] === "finished"){
+                        console.log("Job finished!");
+                    }
+                    else if(body["data"]["job_status"] === "failed"){
+                        console.log("Job failed!");
+                    }
+                    else {
+                        console.log("Job running!");
+                        setTimeout(updateJobStatus, 1000);
+                    }
                 });
             }
         });

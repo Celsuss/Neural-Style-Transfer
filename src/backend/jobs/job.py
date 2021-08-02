@@ -6,3 +6,4 @@ def create_job(contentImage, styleImage):
 
 def test_print():
     print('test print')
+    return "work done"
