@@ -18,7 +18,7 @@ app.config['SECRET_KEY'] = os.urandom(24)
 
 @app.route('/')
 def test():
-    return "Neural Style Transfer v1"
+    return 'Neural Style Transfer v1'
 
 """Add job to queue"""
 def run_job(contentFile, styleFile):
@@ -39,13 +39,13 @@ def post_images():
     files = request.files.to_dict()
 
     if 'content_file' not in files or 'style_file' not in files:
-        return make_response(jsonify({'error': 'fail', "msg": "Content or style file missing"}), 400)
+        return make_response(jsonify({'error': 'fail', 'msg': 'Content or style file missing'}), 400)
 
     contentFile = files['content_file']
     styleFile = files['style_file']
 
     if contentFile.filename.split('.')[-1].lower() not in supported_types or styleFile.filename.split('.')[-1].lower() not in supported_types:
-        return make_response(jsonify({'error': 'fail', "msg": "Unsuported file type"}), 400)
+        return make_response(jsonify({'error': 'fail', 'msg': 'Unsuported file type'}), 400)
 
     contentFile = contentFile.read()
     styleFile = styleFile.read()
@@ -55,10 +55,10 @@ def post_images():
     job = run_job(contentImage, styleImage)
 
     response_object = {
-        "status": "success",
-        "msg": "Images uploaded",
-        "data": {
-            "job_id": job.get_id()
+        'status': 'success',
+        'msg': 'Images uploaded',
+        'data': {
+            'job_id': job.get_id()
         },
     }
     res = make_response(jsonify(response_object), 202)
@@ -69,7 +69,6 @@ def post_images():
 def get_job_status(job_id):
     # GET
     print('Get job status')
-    test_print()
 
     return make_response(jsonify({'status': 'success', 'msg': 'Job status retrieved: {}'.format(job_id)}), 202)
 
@@ -81,16 +80,16 @@ def get_job_status(job_id):
     if job:
         response_code = 200
         response_object = {
-            "status": "success",
-            "data": {
-                "job_id": job.get_id(),
-                "job_status": job.get_status(),
-                "job_result": job.result,
+            'status': 'success',
+            'data': {
+                'job_id': job.get_id(),
+                'job_status': job.get_status(),
+                'job_result': job.result,
             },
         }
     else:
         response_code = 400
-        response_object = {"status": "error"}
+        response_object = {'status': 'error', 'msg': 'Job not found'}
 
     return make_response(jsonify(response_object), response_code)
 
