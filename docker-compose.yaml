@@ -14,9 +14,9 @@ services:
 
     backend-worker-service:
         image: backend-service
-        command: python worker/worker.py
+        command: python worker.py
         volumes:
-            - ./src/backend/worker/:/app/worker
+            - ./src/backend/:/app
         depends_on:
             - redis
             - backend-service

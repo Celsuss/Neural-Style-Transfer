@@ -3,7 +3,7 @@ from rq import Queue, Connection
 import redis
 import os
 
-from main import create_job
+from jobs.job import create_job, test_print
 
 supported_types = ['jpg', 'png'] 
 app = Flask(__name__) 
@@ -21,11 +21,17 @@ def test():
 
 """Add job to queue"""
 def run_job(contentFile, styleFile):
-    # Tell RQ what Redis connection to use
-    redis_conn = redis.Redis()
-    q = Queue(connection=redis_conn)
-    job = q.enqueue(create_job, contentFile, styleFile)
-    return job
+    # TODO: Move redisURL to a config file
+    redisURL = 'redis://redis:6379/0'
+    with Connection(redis.from_url(redisURL)):
+        q = Queue()
+        job = q.enqueue(test_print)
+        # job = q.enqueue(create_job, contentFile, styleFile)
+        return job
+
+from PIL import Image
+import base64
+import io
 
 """Upload images and start a job to create a new image"""
 @app.route('/post_images', methods=['POST'])
@@ -39,9 +45,17 @@ def post_images():
         return make_response(jsonify({'error': 'fail', "msg": "Content or style file missing"}), 400)
 
     contentFile = files['content_file']
-    styleFile = request.files['style_file']
+    styleFile = files['style_file']
 
-    # job = run_job(contentFile, styleFile)
+    if contentFile.filename.split('.')[-1].lower() not in supported_types or styleFile.filename.split('.')[-1].lower() not in supported_types:
+        return make_response(jsonify({'error': 'fail', "msg": "Unsuported file type"}), 400)
+
+    contentFile = contentFile.read()
+    styleFile = styleFile.read()
+    contentImage = Image.open(io.BytesIO(contentFile))
+    styleImage = Image.open(io.BytesIO(styleFile))
+
+    job = run_job(contentImage, styleImage)
 
     response_object = {
         "status": "success",
@@ -58,9 +72,11 @@ def post_images():
 def get_job_status(job_id):
     # GET
     print('Get job status')
+    test_print()
 
     return make_response(jsonify({'status': 'success', 'msg': 'Job status retrieved: {}'.format(job_id)}), 202)
 
+    # TODO: Move redisURL to a config file
     redisURL = 'redis://redis:6379/0'
     with Connection(redis.from_url(redisURL)):
         q = Queue()
