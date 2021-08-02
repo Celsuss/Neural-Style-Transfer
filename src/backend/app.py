@@ -63,6 +63,8 @@ def post_images():
     res = make_response(jsonify(response_object), 202)
     return res
 
+from base64 import encodebytes
+
 """Get Status from job"""
 @app.route('/jobs/get_job_status/<job_id>', methods=['GET'])
 def get_job_status(job_id):
@@ -70,10 +72,12 @@ def get_job_status(job_id):
     print('Get job status for job: {}'.format(job_id))
 
     # TODO: Move redisURL to a config file
+    # TODO: Move get job to function
     redisURL = 'redis://redis:6379/0'
     with Connection(redis.from_url(redisURL)):
         q = Queue()
         job = q.fetch_job(job_id)
+        
     if job:
         response_code = 200
         response_object = {
@@ -89,6 +93,43 @@ def get_job_status(job_id):
         response_object = {'status': 'error', 'msg': 'Job not found'}
 
     return make_response(jsonify(response_object), response_code)
+
+"""Get image from job"""
+@app.route('/jobs/get_job_image/<job_id>', methods=['GET'])
+def get_job_image(job_id):
+    # GET
+    print('Get job image for job: {}'.format(job_id))
+
+    # TODO: Move redisURL to a config file
+    # TODO: Move get job to function
+    redisURL = 'redis://redis:6379/0'
+    with Connection(redis.from_url(redisURL)):
+        q = Queue()
+        job = q.fetch_job(job_id)  
+
+    if job:
+        job_image = job.meta['image']
+        img_byte_arr = io.BytesIO()
+        job_image.save(img_byte_arr, format='PNG')
+
+        encoded_img = encodebytes(img_byte_arr.getvalue()).decode('ascii')
+        # encoded_img = img_byte_arr.getvalue()
+        
+        response_code = 200
+        response_object = {
+            'status': 'success',
+            'data': {
+                'job_id': job.get_id(),
+                'job_status': job.get_status(),
+                'job_result': job.result,
+                'job_image': encoded_img
+            },
+        }
+    else:
+        response_code = 400
+        response_object = {'status': 'error', 'msg': 'Job not found'}
+
+    return make_response(jsonify(response_object), response_code)  
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
