@@ -15,6 +15,9 @@ const contentDefaultText = contentPreviewContainer.querySelector(".preview_defau
 const stylePreviewImage = stylePreviewContainer.querySelector(".preview_image");
 const styleDefaultText = stylePreviewContainer.querySelector(".preview_default_text");
 
+// Image result
+const resultImage = document.getElementById("resultImage");
+
 function selectUploadFile(file, previewImage, previewDefaultText, dataFileKey){
     if(file){
         previewImage.style.display = "block";
@@ -129,9 +132,10 @@ function updateJobStatus(){
     getJobStatus();
 }
 
+// Get job image
 function getJobImage(){
     const getImage = async() => {
-        const response = await fetch(`http://127.0.0.1:5000/jobs/get_job_image/${jobId}`,{
+        const response = await fetch(`http://127.0.0.1:5000/jobs/get_job_image_url/${jobId}`,{
             method: 'GET',
             headers: {
                 'credentials': "same-origin",
@@ -150,6 +154,9 @@ function getJobImage(){
                 response.json().then(function(body){
                     console.log(`Sucess fetching image! \nStatus code: ${response.status}`);
                     console.log(body); 
+
+                    resultImage.style.display = "block";
+                    resultImage.setAttribute("src", `http://127.0.0.1:5000/${body["data"]["image_url"]}`);
                 });
             }
         });

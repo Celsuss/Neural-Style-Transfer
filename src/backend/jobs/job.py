@@ -6,7 +6,7 @@ def create_job(contentImage, styleImage):
     job.meta['image'] = contentImage
     job.save_meta()
 
-    time.sleep(5)
+    time.sleep(2)
     return True
 
 def test_print():

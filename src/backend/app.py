@@ -95,10 +95,10 @@ def get_job_status(job_id):
     return make_response(jsonify(response_object), response_code)
 
 """Get image from job"""
-@app.route('/jobs/get_job_image/<job_id>', methods=['GET'])
-def get_job_image(job_id):
+@app.route('/jobs/get_job_image_url/<job_id>', methods=['GET'])
+def get_job_image_url(job_id):
     # GET
-    print('Get job image for job: {}'.format(job_id))
+    print('Get job image url for job: {}'.format(job_id))
 
     # TODO: Move redisURL to a config file
     # TODO: Move get job to function
@@ -109,22 +109,18 @@ def get_job_image(job_id):
 
     if job:
         job_image = job.meta['image']
-        img_byte_arr = io.BytesIO()
-        job_image.save(img_byte_arr, format='PNG')
-
-        encoded_img = encodebytes(img_byte_arr.getvalue()).decode('ascii')
-        # encoded_img = img_byte_arr.getvalue()
         
+        path = 'static/{}.png'.format(job_id)
+        job_image.save(path)
+
         response_code = 200
         response_object = {
             'status': 'success',
             'data': {
-                'job_id': job.get_id(),
-                'job_status': job.get_status(),
-                'job_result': job.result,
-                'job_image': encoded_img
+                'image_url': path
             },
         }
+
     else:
         response_code = 400
         response_object = {'status': 'error', 'msg': 'Job not found'}
