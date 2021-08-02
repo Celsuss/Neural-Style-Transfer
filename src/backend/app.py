@@ -1,14 +1,15 @@
 from flask import Flask, request, make_response, jsonify
 from rq import Queue, Connection
+from flask_cors import CORS
+from PIL import Image
 import redis
+import io
 import os
 
 from jobs.job import create_job, test_print
 
 supported_types = ['jpg', 'png'] 
 app = Flask(__name__) 
-
-from flask_cors import CORS
 
 cors = CORS(app)
 
@@ -28,10 +29,6 @@ def run_job(contentFile, styleFile):
         job = q.enqueue(test_print)
         # job = q.enqueue(create_job, contentFile, styleFile)
         return job
-
-from PIL import Image
-import base64
-import io
 
 """Upload images and start a job to create a new image"""
 @app.route('/post_images', methods=['POST'])
