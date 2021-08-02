@@ -1,4 +1,5 @@
-from rq import get_current_job
+from rq import get_current_job, Queue, Connection
+import redis
 import time
 
 def create_job(contentImage, styleImage):
@@ -9,6 +10,10 @@ def create_job(contentImage, styleImage):
     time.sleep(2)
     return True
 
-def test_print():
-    print('test print')
-    return "work done"
+def get_job(job_id):
+    # TODO: Move redisURL to a config file
+    redisURL = 'redis://redis:6379/0'
+    with Connection(redis.from_url(redisURL)):
+        q = Queue()
+        job = q.fetch_job(job_id)
+    return job

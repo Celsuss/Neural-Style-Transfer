@@ -6,7 +6,7 @@ import redis
 import io
 import os
 
-from jobs.job import create_job, test_print
+from jobs.job import create_job, get_job
 
 supported_types = ['jpg', 'png'] 
 app = Flask(__name__) 
@@ -71,13 +71,7 @@ def get_job_status(job_id):
     # GET
     print('Get job status for job: {}'.format(job_id))
 
-    # TODO: Move redisURL to a config file
-    # TODO: Move get job to function
-    redisURL = 'redis://redis:6379/0'
-    with Connection(redis.from_url(redisURL)):
-        q = Queue()
-        job = q.fetch_job(job_id)
-        
+    job = get_job(job_id)
     if job:
         response_code = 200
         response_object = {
@@ -100,13 +94,7 @@ def get_job_image_url(job_id):
     # GET
     print('Get job image url for job: {}'.format(job_id))
 
-    # TODO: Move redisURL to a config file
-    # TODO: Move get job to function
-    redisURL = 'redis://redis:6379/0'
-    with Connection(redis.from_url(redisURL)):
-        q = Queue()
-        job = q.fetch_job(job_id)  
-
+    job = get_job(job_id)
     if job:
         job_image = job.meta['image']
         
