@@ -100,12 +100,12 @@ function updateJobStatus(){
             // TODO: Move error to the else statment
             if (response.status !== 200){
                 response.json().then(function(body){
-                    console.log(`Status code: ${response.status}, Error message ${body["msg"]}`);
+                    console.log(`Failed fetching image: Status code: ${response.status}, Error message ${body["msg"]}`);
                 });
             }
             else{
                 response.json().then(function(body){
-                    console.log(`Sucess! \nStatus code: ${response.status}`);
+                    console.log(`Sucess getting job status! \nStatus code: ${response.status}`);
                     console.log(body); 
 
                     jobStatusText.innerHTML = body["data"]["job_status"];
@@ -113,6 +113,7 @@ function updateJobStatus(){
                     
                     if(body["data"]["job_status"] === "finished"){
                         console.log("Job finished!");
+                        getJobImage();
                     }
                     else if(body["data"]["job_status"] === "failed"){
                         console.log("Job failed!");
@@ -126,4 +127,32 @@ function updateJobStatus(){
         });
     }
     getJobStatus();
+}
+
+function getJobImage(){
+    const getImage = async() => {
+        const response = await fetch(`http://127.0.0.1:5000/jobs/get_job_image/${jobId}`,{
+            method: 'GET',
+            headers: {
+                'credentials': "same-origin",
+                'credentials': "include",
+                'Origin': 'http://localhost:5500/'
+            }
+        })
+        .then(function(response) {
+            // TODO: Move error to the else statment
+            if (response.status !== 200){
+                response.json().then(function(body){
+                    console.log(`Failed fetching image: Status code: ${response.status}, Error message ${body["msg"]}`);
+                });
+            }
+            else{
+                response.json().then(function(body){
+                    console.log(`Sucess fetching image! \nStatus code: ${response.status}`);
+                    console.log(body); 
+                });
+            }
+        });
+    }
+    getImage();
 }
