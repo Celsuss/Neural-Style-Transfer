@@ -99,20 +99,18 @@ def trainModel(extractor, style_image, content_image):
     content_weight=1e4
 
     trainStep(image, optimizer, extractor, style_targets, style_weight, content_targets, content_weight)
-    # trainStep(image, optimizer, extractor, style_targets, style_weight, content_targets, content_weight)
-    # trainStep(image, optimizer, extractor, style_targets, style_weight, content_targets, content_weight)
+    trainStep(image, optimizer, extractor, style_targets, style_weight, content_targets, content_weight)
+    trainStep(image, optimizer, extractor, style_targets, style_weight, content_targets, content_weight)
     print('Finished training')
     return tensorToImage(image)
 
 def preprocessImage(image):
-    original_image = image  # TODO: Remove this line
     max_dim = 512
     
     # image = tf.keras.preprocessing.image.img_to_array(image)
     image = np.array(image)
 
     # image = tf.image.decode_image(image, channels=3)
-
     image = tf.image.convert_image_dtype(image, tf.float32)
     shape = tf.cast(tf.shape(image)[:-1], tf.float32)
     long_dim = max(shape)
@@ -145,9 +143,6 @@ if __name__ == '__main__':
 
     style_image = PIL.Image.open(style_path)
     content_image = PIL.Image.open(content_path)
-
-    # style_image = tf.io.read_file(style_path)
-    # content_image = tf.io.read_file(content_path)
 
     result = styleTransfer(style_image, content_image)
     result.show()
