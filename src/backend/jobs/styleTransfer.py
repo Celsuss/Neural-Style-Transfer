@@ -99,21 +99,55 @@ def trainModel(extractor, style_image, content_image):
     content_weight=1e4
 
     trainStep(image, optimizer, extractor, style_targets, style_weight, content_targets, content_weight)
-    trainStep(image, optimizer, extractor, style_targets, style_weight, content_targets, content_weight)
-    trainStep(image, optimizer, extractor, style_targets, style_weight, content_targets, content_weight)
+    # trainStep(image, optimizer, extractor, style_targets, style_weight, content_targets, content_weight)
+    # trainStep(image, optimizer, extractor, style_targets, style_weight, content_targets, content_weight)
+    print('Finished training')
     return tensorToImage(image)
 
+def preprocessImage(image):
+    original_image = image  # TODO: Remove this line
+    max_dim = 512
+    
+    # image = tf.keras.preprocessing.image.img_to_array(image)
+    image = np.array(image)
+
+    # image = tf.image.decode_image(image, channels=3)
+
+    image = tf.image.convert_image_dtype(image, tf.float32)
+    shape = tf.cast(tf.shape(image)[:-1], tf.float32)
+    long_dim = max(shape)
+    scale = max_dim / long_dim
+
+    new_shape = tf.cast(shape * scale, tf.int32)
+
+    image = tf.image.resize(image, new_shape)
+    image = image[tf.newaxis, :]
+    return image
 
 def styleTransfer(style_image, content_image):
     print('Starting style transfer')
-    style_extractor = vggLayers(style_layers)
-    style_outputs = style_extractor(style_image*255)
+    style_image = preprocessImage(style_image)
+    content_image = preprocessImage(content_image)
+
+    # style_extractor = vggLayers(style_layers)
+    # style_outputs = style_extractor(style_image*255)
 
     extractor = StyleContentModel(style_layers, content_layers)
-    results = extractor(tf.constant(content_image))
+    # results = extractor(tf.constant(content_image))
 
+    result = trainModel(extractor, style_image, content_image)
+    return result
 
-    return 0
-
+# TODO: Remove this, only for debugging
 if __name__ == '__main__':
-    styleTransfer()
+    style_path = 'C:/Users/Jens/Documents/Workspace/Neural-Style-Transfer/content/IMG-20201228-WA0001.jpg'
+    content_path = 'C:/Users/Jens/Documents/Workspace/Neural-Style-Transfer/style/vincent_van_gogh_self_portrait_painting.jpg'
+
+    style_image = PIL.Image.open(style_path)
+    content_image = PIL.Image.open(content_path)
+
+    # style_image = tf.io.read_file(style_path)
+    # content_image = tf.io.read_file(content_path)
+
+    result = styleTransfer(style_image, content_image)
+    result.show()

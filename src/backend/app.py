@@ -1,4 +1,5 @@
 from flask import Flask, request, make_response, jsonify
+from tensorflow import io as tensorflow_io
 from rq import Queue, Connection
 from flask_cors import CORS
 from PIL import Image
@@ -6,7 +7,7 @@ import redis
 import io
 import os
 
-from jobs.job import create_job, get_job
+from jobs.job import create_job, get_job, test_job
 
 supported_types = ['jpg', 'png'] 
 app = Flask(__name__) 
@@ -21,6 +22,7 @@ def test():
     return 'Neural Style Transfer v1'
 
 """Add job to queue"""
+# TODO: Move to job.py
 def run_job(contentFile, styleFile):
     # TODO: Move redisURL to a config file
     redisURL = 'redis://redis:6379/0'
@@ -48,8 +50,11 @@ def post_images():
 
     contentFile = contentFile.read()
     styleFile = styleFile.read()
+
     contentImage = Image.open(io.BytesIO(contentFile))
     styleImage = Image.open(io.BytesIO(styleFile))
+    # contentImage = tensorflow_io.read_file(io.BytesIO(contentFile))
+    # styleImage = tensorflow_io.read_file(io.BytesIO(styleFile))
 
     job = run_job(contentImage, styleImage)
 
