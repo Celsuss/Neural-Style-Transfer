@@ -1,3 +1,4 @@
+from rq import get_current_job, Queue, Connection
 import tensorflow as tf
 import numpy as np
 import PIL.Image
@@ -89,7 +90,8 @@ def trainStep(image, optimizer, extractor, style_targets, style_weight, content_
         optimizer.apply_gradients([(grad, image)])
         image.assign(clip_0_1(image))
 
-def trainModel(extractor, style_image, content_image):
+def trainModel(extractor, content_image, style_image):
+    job = get_current_job()
     style_targets = extractor(style_image)['style']
     content_targets = extractor(content_image)['content']
     image = tf.Variable(content_image)
@@ -98,9 +100,15 @@ def trainModel(extractor, style_image, content_image):
     style_weight=1e-2
     content_weight=1e4
 
-    trainStep(image, optimizer, extractor, style_targets, style_weight, content_targets, content_weight)
-    trainStep(image, optimizer, extractor, style_targets, style_weight, content_targets, content_weight)
-    trainStep(image, optimizer, extractor, style_targets, style_weight, content_targets, content_weight)
+    epochs = 1
+    train_steps = 10
+
+    for epoch in range(epochs):
+        for train_step in range(train_steps):
+            trainStep(image, optimizer, extractor, style_targets, style_weight, content_targets, content_weight)
+            job.meta['progress'] = (epoch*train_steps + train_step) / (epochs*train_steps)
+            job.save_meta()
+
     print('Finished training')
     return tensorToImage(image)
 
@@ -122,7 +130,7 @@ def preprocessImage(image):
     image = image[tf.newaxis, :]
     return image
 
-def styleTransfer(style_image, content_image):
+def styleTransfer(content_image, style_image):
     print('Starting style transfer')
     style_image = preprocessImage(style_image)
     content_image = preprocessImage(content_image)
@@ -133,13 +141,13 @@ def styleTransfer(style_image, content_image):
     extractor = StyleContentModel(style_layers, content_layers)
     # results = extractor(tf.constant(content_image))
 
-    result = trainModel(extractor, style_image, content_image)
+    result = trainModel(extractor, content_image, style_image)
     return result
 
 # TODO: Remove this, only for debugging
 if __name__ == '__main__':
-    style_path = 'C:/Users/Jens/Documents/Workspace/Neural-Style-Transfer/content/IMG-20201228-WA0001.jpg'
-    content_path = 'C:/Users/Jens/Documents/Workspace/Neural-Style-Transfer/style/vincent_van_gogh_self_portrait_painting.jpg'
+    style_path = 'C:/Users/Jens/Documents/Workspace/Neural-Style-Transfer/style/vincent_van_gogh_self_portrait_painting.jpg'
+    content_path = 'C:/Users/Jens/Documents/Workspace/Neural-Style-Transfer/content/IMG-20201228-WA0001.jpg'
 
     style_image = PIL.Image.open(style_path)
     content_image = PIL.Image.open(content_path)

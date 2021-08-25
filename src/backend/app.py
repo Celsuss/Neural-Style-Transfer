@@ -75,8 +75,12 @@ from base64 import encodebytes
 def get_job_status(job_id):
     # GET
     print('Get job status for job: {}'.format(job_id))
-
     job = get_job(job_id)
+
+    progress = 0
+    if 'progress' in job.meta:
+        progress = job.meta['progress']
+
     if job:
         response_code = 200
         response_object = {
@@ -85,6 +89,7 @@ def get_job_status(job_id):
                 'job_id': job.get_id(),
                 'job_status': job.get_status(),
                 'job_result': job.result,
+                'job_progress': progress,
             },
         }
     else:
